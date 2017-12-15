@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GUI
+namespace Slave2
 {
     class Program
     {

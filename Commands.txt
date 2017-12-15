@@ -1,0 +1,5 @@
+info: nedenstående kommandoer køres fra de respektive projektmappers rod (f.eks.: ./GUI)
+
+
+1.	byg et billede vha. dockerfilen			:		docker build -t docker-gui -f dockerfile .
+2.	byg og kør en container fra billedet	:		docker run -it docker-gui

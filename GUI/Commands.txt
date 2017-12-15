@@ -1,2 +1,0 @@
-1.	-	build the image:		docker build -t gui .
-2.	-	build the container:	
