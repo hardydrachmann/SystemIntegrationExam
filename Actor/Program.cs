@@ -1,12 +1,13 @@
 ﻿using System;
 
-namespace Slave2
+namespace Actor
 {
     class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Actor actor = new Actor();
+            actor.doStuff();
         }
     }
 }
