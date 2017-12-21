@@ -12,23 +12,28 @@ namespace Actor
         public void Start()
         {
             Console.Write("Enter a unique ID number for the car: ");
-            int consumerId = Int32.Parse(Console.ReadLine());
+            int id = Int32.Parse(Console.ReadLine());
 
             using (var bus = RabbitHutch.CreateBus("host=localhost").Advanced)
             {
+
                 // Declare an exchange:
-                var exchange = bus.ExchangeDeclare("IAdvancedBus.Fanout", ExchangeType.Fanout);
+                var main = bus.ExchangeDeclare("MainExchange", ExchangeType.Direct);
+                var fanout = bus.ExchangeDeclare("BroadcastExchange", ExchangeType.Fanout);
 
-                // Declare a queue:
-                var queue = bus.QueueDeclare("IAdvancedBus" + consumerId);
+                // Create a message with Fanout (broadcasting):
+                var textMessage = new TextMessage { Text = id.ToString() };
+                IMessage<TextMessage> message = new Message<TextMessage>(textMessage);
 
-                // Bind the queue:
-                bus.Bind(exchange, queue, "routingKey");
+                // Publish the message with the same routing key (the routing key, as mentioned above, is not used with Fanout exchange):
+                bus.Publish<TextMessage>(main, "DeclareActor", true, message);
 
-                // Consume synchronous consumer:
-                bus.Consume<TextMessage>(queue, (message, info) => Console.WriteLine("Consumed: " + message.Body.Text));
-                
-                Console.Write("\nconsumer is running...");
+                var queue = bus.QueueDeclare("FanoutQueue"  + id);
+                bus.Bind(fanout, queue, "broadcast");
+                bus.Consume<TextMessage>(queue, (content, info) =>
+                {
+                    Console.WriteLine(content.Body.Text);
+                });
                 Console.ReadKey();
             }
         }

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dispatch", "Dispatch\Dispatch.csproj", "{82578981-92FD-45A6-A3BD-BF4BA9759234}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dispatch", "Dispatch\Dispatch.csproj", "{82578981-92FD-45A6-A3BD-BF4BA9759234}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Messages", "Messages\Messages.csproj", "{2F1246E8-320A-45FB-8808-EDC75B0AFB07}"
 EndProject

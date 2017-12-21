@@ -14,14 +14,28 @@ namespace Dispatch
             using (var bus = RabbitHutch.CreateBus("host=localhost").Advanced)
             {
                 // Declare an exchange:
-                var exchange = bus.ExchangeDeclare("IAdvancedBus.Fanout", ExchangeType.Fanout);
+                var main = bus.ExchangeDeclare("MainExchange", ExchangeType.Direct);
+                var fanout = bus.ExchangeDeclare("BroadcastExchange", ExchangeType.Fanout);
 
-                // Create a message with Fanout (broadcasting):
-                var textMessage = new TextMessage { Text = "Test" };
-                IMessage<TextMessage> message = new Message<TextMessage>(textMessage);
-          
-                // Publish the message with the same routing key (the routing key, as mentioned above, is not used with Fanout exchange):
-                bus.Publish<TextMessage>(exchange, "routingKey", false, message);
+                // Declare a queue:
+                var queue = bus.QueueDeclare("MainQueue");
+
+                // Bind the queue:
+                bus.Bind(main, queue, "DeclareActor");
+
+                // Consume synchronous consumer:
+                bus.Consume<TextMessage>(queue, (message, info) =>
+                {
+                    string id = message.Body.Text;
+                    var textMessage = new TextMessage { Text = "Confirmed " + id };
+                    IMessage<TextMessage> confirmMessage = new Message<TextMessage>(textMessage);
+                    Console.WriteLine("Consumed: " + message.Body.Text);
+                    bus.Publish(fanout, "broadcast", true, confirmMessage);
+                });
+
+                Console.WriteLine("Consumer is running...");
+                Console.ReadKey();
+
             }
         }
     }
