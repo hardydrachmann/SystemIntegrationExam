@@ -7,7 +7,7 @@ namespace Actor
         static void Main(string[] args)
         {
             Actor actor = new Actor();
-            actor.doStuff();
+            actor.Start();
         }
     }
 }

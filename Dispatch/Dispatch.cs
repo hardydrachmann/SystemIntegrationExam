@@ -9,7 +9,7 @@ namespace Dispatch
 {
     public class Dispatch
     {
-        public void doStuff()
+        public void Start()
         {
             using (var bus = RabbitHutch.CreateBus("host=localhost").Advanced)
             {

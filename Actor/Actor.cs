@@ -9,9 +9,9 @@ namespace Actor
 {
     public class Actor
     {
-        public void doStuff()
+        public void Start()
         {
-            Console.Write("enter a unique number for the consumer: ");
+            Console.Write("Enter a unique ID number for the car: ");
             int consumerId = Int32.Parse(Console.ReadLine());
 
             using (var bus = RabbitHutch.CreateBus("host=localhost").Advanced)
