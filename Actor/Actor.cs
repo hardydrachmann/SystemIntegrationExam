@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using EasyNetQ;
 using EasyNetQ.Topology;
 using Messages;
@@ -9,7 +10,7 @@ namespace Actor
 {
     public class Actor
     {
-        public void Start()
+        public async void Start()
         {
             Console.Write("Enter a unique ID number for the car: ");
             string id = Console.ReadLine();
@@ -43,7 +44,7 @@ namespace Actor
                 {
                     Console.WriteLine(statusRequest.Body.Payload + " broadcast from " + statusRequest.Body.Sender);
                 });
-                Console.Read();
+                await Task.Delay(1999999);
             }
         }
     }

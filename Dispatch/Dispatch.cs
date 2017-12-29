@@ -28,7 +28,7 @@ namespace Dispatch
                     //Console.WriteLine("Consumed: " + message.Body.Sender);
                     //bus.Publish(fanout, "broadcast", true, confirmMessage);
                 });
-                await Task.Delay(999999);
+                await Task.Delay(1999999);
             }
         }
 
@@ -47,7 +47,7 @@ namespace Dispatch
                 });
                 bus.Publish(main, "StatusRequest" + id, true, request);
                 Console.WriteLine(id);
-                await Task.Delay(999999);
+                await Task.Delay(1999999);
             }
         }
 
@@ -58,7 +58,7 @@ namespace Dispatch
                 var fanout = bus.ExchangeDeclare("BroadcastExchange", ExchangeType.Fanout);
                 IMessage<StatusRequestMessage> request = MessagesFactory.GetMessage<StatusRequestMessage>("Master", "payload");
                 bus.Publish(fanout, "broadcast", true, request);
-                await Task.Delay(999999);
+                await Task.Delay(1999999);
             }
         }
     }
