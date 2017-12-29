@@ -18,12 +18,12 @@ namespace Actor
             {
                 // Declare an exchange:
                 var mainExchange = bus.ExchangeDeclare("MainExchange", ExchangeType.Direct);
-                //var fanout = bus.ExchangeDeclare("BroadcastExchange", ExchangeType.Fanout);
-
 				var mainQueue = bus.QueueDeclare("DirectQueue" + id);
-				//var broadcastQueue = bus.QueueDeclare("FanoutQueue" + id);
-				//bus.Bind(fanout, broadcastQueue, "broadcast");
 				bus.Bind(mainExchange, mainQueue, "StatusRequest" + id);
+
+                var broadcastExchange = bus.ExchangeDeclare("BroadcastExchange", ExchangeType.Fanout);
+                var broadcastQueue = bus.QueueDeclare("FanoutQueue" + id);
+                bus.Bind(broadcastExchange, broadcastQueue, "broadcast");
 
                 // Create a message with Fanout (broadcasting):
                 IMessage<ActorDeclarationMessage> message = MessagesFactory.GetMessage<ActorDeclarationMessage>(id, "");
@@ -33,10 +33,15 @@ namespace Actor
 
                 bus.Consume<StatusRequestMessage>(mainQueue, (statusRequest, info) =>
                 {
-                    Console.WriteLine(statusRequest.Body.Payload + " from " + statusRequest.Body.Sender);
+                    Console.WriteLine(statusRequest.Body.Payload + " directly from " + statusRequest.Body.Sender);
                     IMessage<StatusResponseMessage> response = MessagesFactory.GetMessage<StatusResponseMessage>(id, "Actor status");
                     bus.Publish(mainExchange, "ActorStatus", true, response);
                     Console.WriteLine(id);
+                });
+
+                bus.Consume<StatusRequestMessage>(broadcastQueue, (statusRequest, info) =>
+                {
+                    Console.WriteLine(statusRequest.Body.Payload + " broadcast from " + statusRequest.Body.Sender);
                 });
                 Console.Read();
             }

@@ -76,12 +76,18 @@ namespace Dispatch
 
         private void getAllCarsStatus()
         {
-            Console.WriteLine("1");
+            dispatch.BroadcastStatusRequest((message) =>
+            {
+                Console.WriteLine("GUI received payload: " + message);
+            });
         }
 
         private void getCarStatus()
         {
-            dispatch.SendStatusRequest("123", (message) =>
+            Console.WriteLine("Request status of actor ID:");
+            string id = Console.ReadLine(); 
+            Console.WriteLine("Read id: " + id);
+            dispatch.SendStatusRequest(id, (message) =>
             {
                 Console.WriteLine("GUI received payload: " + message);
             });

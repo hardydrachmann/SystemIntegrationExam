@@ -2,6 +2,7 @@
 using System;
 using EasyNetQ.Topology;
 using Messages;
+using System.Threading.Tasks;
 
 namespace Dispatch
 {
@@ -9,12 +10,11 @@ namespace Dispatch
     {
         public delegate void Callback(string arg);
 
-        public void Listen(Callback onActorDeclare)
+        public async void Listen(Callback onActorDeclare)
         {
             using (var bus = RabbitHutch.CreateBus("host=localhost").Advanced)
             {
                 var main = bus.ExchangeDeclare("MainExchange", ExchangeType.Direct);
-                //var fanout = bus.ExchangeDeclare("BroadcastExchange", ExchangeType.Fanout);
                 var queue = bus.QueueDeclare("MainQueue");
                 bus.Bind(main, queue, "ActorDeclaration");
 
@@ -28,11 +28,11 @@ namespace Dispatch
                     //Console.WriteLine("Consumed: " + message.Body.Sender);
                     //bus.Publish(fanout, "broadcast", true, confirmMessage);
                 });
-                Console.Read();
+                await Task.Delay(999999);
             }
         }
 
-        public void SendStatusRequest(string id, Callback callback)
+        public async void SendStatusRequest(string id, Callback callback)
         {
             using (var bus = RabbitHutch.CreateBus("host=localhost").Advanced)
             {
@@ -41,14 +41,24 @@ namespace Dispatch
                 bus.Bind(main, queue, "ActorStatus");
 
                 IMessage<StatusRequestMessage> request = MessagesFactory.GetMessage<StatusRequestMessage>("Master", "payload");
-                bus.Publish(main, "StatusRequest" + id, true, request);
                 bus.Consume<StatusResponseMessage>(queue, (message, info) =>
                 {
-                    Console.WriteLine("Received message from actor " + message.Body.Sender);
-                    Console.WriteLine("Message value " + message.Body.Payload);
                     callback(message.Body.Payload);
                 });
-                Console.Read();
+                bus.Publish(main, "StatusRequest" + id, true, request);
+                Console.WriteLine(id);
+                await Task.Delay(999999);
+            }
+        }
+
+        public async void BroadcastStatusRequest(Callback callback)
+        {
+            using (var bus = RabbitHutch.CreateBus("host=localhost").Advanced)
+            {
+                var fanout = bus.ExchangeDeclare("BroadcastExchange", ExchangeType.Fanout);
+                IMessage<StatusRequestMessage> request = MessagesFactory.GetMessage<StatusRequestMessage>("Master", "payload");
+                bus.Publish(fanout, "broadcast", true, request);
+                await Task.Delay(999999);
             }
         }
     }
