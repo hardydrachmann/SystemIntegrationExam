@@ -21,16 +21,16 @@ namespace Dispatch
                 var queue = bus.QueueDeclare("MainQueue");
 
                 // Bind the queue:
-                bus.Bind(main, queue, "DeclareActor");
+                bus.Bind(main, queue, "ActorDeclaration");
 
                 // Consume synchronous consumer:
-                bus.Consume<TextMessage>(queue, (message, info) =>
+                bus.Consume<ActorDeclarationMessage>(queue, (message, info) =>
                 {
-                    string id = message.Body.Text;
-                    var textMessage = new TextMessage { Text = "Confirmed " + id };
-                    IMessage<TextMessage> confirmMessage = new Message<TextMessage>(textMessage);
-                    Console.WriteLine("Consumed: " + message.Body.Text);
-                    bus.Publish(fanout, "broadcast", true, confirmMessage);
+                    //string id = message.Body.Text;
+                    //var textMessage = new Message { Text = "Confirmed " + id };
+                    //IMessage<Message> confirmMessage = new Message<Message>(textMessage);
+                    Console.WriteLine("Consumed: " + message.Body.Sender);
+                    //bus.Publish(fanout, "broadcast", true, confirmMessage);
                 });
 
                 Console.WriteLine("Consumer is running...");
