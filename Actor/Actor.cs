@@ -13,6 +13,8 @@ namespace Actor
         {
             Console.Write("Enter a unique ID number for the car: ");
             int id = Int32.Parse(Console.ReadLine());
+            Console.Clear();
+            Console.Write("Car with ID " + id + " online...");
 
             using (var bus = RabbitHutch.CreateBus("host=localhost").Advanced)
             {
@@ -32,7 +34,7 @@ namespace Actor
                 bus.Bind(fanout, queue, "broadcast");
                 bus.Consume<TextMessage>(queue, (content, info) =>
                 {
-                    Console.WriteLine(content.Body.Text);
+                    Console.WriteLine("\n" + content.Body.Text);
                 });
                 Console.ReadKey();
             }

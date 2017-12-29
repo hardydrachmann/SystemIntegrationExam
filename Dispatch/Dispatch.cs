@@ -1,7 +1,5 @@
 ﻿using EasyNetQ;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using EasyNetQ.Topology;
 using Messages;
 
@@ -29,13 +27,9 @@ namespace Dispatch
                     string id = message.Body.Text;
                     var textMessage = new TextMessage { Text = "Confirmed " + id };
                     IMessage<TextMessage> confirmMessage = new Message<TextMessage>(textMessage);
-                    Console.WriteLine("Consumed: " + message.Body.Text);
+                    Console.WriteLine("Consumed message from car with ID " + message.Body.Text);
                     bus.Publish(fanout, "broadcast", true, confirmMessage);
                 });
-
-                Console.WriteLine("Consumer is running...");
-                Console.ReadKey();
-
             }
         }
     }
