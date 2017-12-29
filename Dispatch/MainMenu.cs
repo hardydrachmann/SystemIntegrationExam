@@ -1,42 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Dispatch
 {
     public class MainMenu
     {
-        private Dispatch dispatch;
+        private Dispatch dispatch = new Dispatch();
+        private List<string> actors = new List<string>();
 
         public MainMenu()
         {
-            dispatch = new Dispatch();
-            dispatch.Start();
+            new Task(() => dispatch.Listen(HandleActorID)).Start();
+        }
+
+        public void HandleActorID(string id)
+        {
+            actors.Add(id);
         }
 
         public void Start()
         {
             while (true)
             {
-                Console.Clear();
+                //Console.Clear();
 
                 //// Print with main welcome message.
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("\n*******************************************************************");
-                Console.WriteLine("*                                                                 *");
-                Console.WriteLine("*                     Welcome to the DISPATCH                     *");
-                Console.WriteLine("*                         (version 1.0.0)                         *");
-                Console.WriteLine("*                                                                 *");
-                Console.WriteLine("*******************************************************************");
-                Console.WriteLine("*                                                                 *");
-                Console.WriteLine("* Enter a number from below to choose the task & then press Enter *");
-                Console.WriteLine("*                                                                 *");
-                Console.WriteLine("*******************************************************************");
-                // Generic output section.
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("\nCar ID\t\t\tCar Location\t\tCar Status");
-                Console.WriteLine("___________________________________________________________________");
-                Console.WriteLine("1\t\t\tcall method here");
+                //Console.ForegroundColor = ConsoleColor.Red;
+                //Console.WriteLine("\n*******************************************************************");
+                //Console.WriteLine("*                                                                 *");
+                //Console.WriteLine("*                     Welcome to the DISPATCH                     *");
+                //Console.WriteLine("*                         (version 1.0.0)                         *");
+                //Console.WriteLine("*                                                                 *");
+                //Console.WriteLine("*******************************************************************");
+                //Console.WriteLine("*                                                                 *");
+                //Console.WriteLine("* Enter a number from below to choose the task & then press Enter *");
+                //Console.WriteLine("*                                                                 *");
+                //Console.WriteLine("*******************************************************************");
+                //// Generic output section.
+                //Console.ForegroundColor = ConsoleColor.Yellow;
+                //Console.WriteLine("\nCar ID\t\t\tCar Location\t\tCar Status");
+                //Console.WriteLine("___________________________________________________________________");
+                //Console.WriteLine("1\t\t\tcall method here");
                 // Print with input choices.
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("\n\n   1. Request status of all cars");
@@ -75,7 +81,10 @@ namespace Dispatch
 
         private void getCarStatus()
         {
-            Console.WriteLine("2");
+            dispatch.SendStatusRequest("123", (message) =>
+            {
+                Console.WriteLine("GUI received payload: " + message);
+            });
         }
 
         private void broadcastCommand()
@@ -90,7 +99,6 @@ namespace Dispatch
 
         private void exit()
         {
-            Console.Clear();
             Environment.Exit(0);
         }
     }
