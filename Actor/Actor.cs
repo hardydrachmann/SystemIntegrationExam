@@ -26,7 +26,7 @@ namespace Actor
                 // Publish the message with the same routing key (the routing key, as mentioned above, is not used with Fanout exchange):
                 bus.Publish<ActorDeclarationMessage>(main, "ActorDeclaration", true, message);
 
-                var queue = bus.QueueDeclare("FanoutQueue"  + id);
+                var queue = bus.QueueDeclare("FanoutQueue" + id);
                 bus.Bind(fanout, queue, "broadcast");
 
                 //bus.Consume<Message>(queue, (content, info) =>

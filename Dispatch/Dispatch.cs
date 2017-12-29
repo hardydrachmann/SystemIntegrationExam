@@ -1,7 +1,5 @@
 ﻿using EasyNetQ;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using EasyNetQ.Topology;
 using Messages;
 
@@ -32,10 +30,6 @@ namespace Dispatch
                     Console.WriteLine("Consumed: " + message.Body.Sender);
                     //bus.Publish(fanout, "broadcast", true, confirmMessage);
                 });
-
-                Console.WriteLine("Consumer is running...");
-                Console.ReadKey();
-
             }
         }
     }
