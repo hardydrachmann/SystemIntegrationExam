@@ -73,7 +73,6 @@ namespace Dispatch
                 var fanout = bus.ExchangeDeclare("BroadcastExchange", ExchangeType.Fanout);
                 var request = MessagesFactory.GetMessage<ObjectiveRequestMessage>("Master", objective);
                 bus.Publish(fanout, "Broadcast", true, request);
-                Console.WriteLine("Broadcast objective");
             }
         }
     }
