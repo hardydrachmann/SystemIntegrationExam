@@ -10,7 +10,7 @@ namespace Dispatch
     {
         public delegate void Callback(string arg);
 
-        public async void Listen(Callback onActorDeclare)
+        public async void Listen(Callback onActorDeclare, Callback onStatusResponse)
         {
             using (var bus = RabbitHutch.CreateBus("host=localhost").Advanced)
             {
@@ -18,47 +18,62 @@ namespace Dispatch
                 var queue = bus.QueueDeclare("MainQueue");
                 bus.Bind(main, queue, "ActorDeclaration");
 
-                // Consume synchronous consumer:
                 bus.Consume<ActorDeclarationMessage>(queue, (message, info) =>
                 {
                     onActorDeclare(message.Body.Sender);
-                    //string id = message.Body.Text;
-                    //var textMessage = new Message { Text = "Confirmed " + id };
-                    //IMessage<Message> confirmMessage = new Message<Message>(textMessage);
-                    //Console.WriteLine("Consumed: " + message.Body.Sender);
-                    //bus.Publish(fanout, "broadcast", true, confirmMessage);
                 });
+
+                bus.Consume<StatusResponseMessage>(queue, (message, info) =>
+                {
+                    onStatusResponse(message.Body.Payload);
+                });
+
                 await Task.Delay(1999999);
             }
         }
 
-        public async void SendStatusRequest(string id, Callback callback)
+        public void SendStatusRequest(string id)
         {
             using (var bus = RabbitHutch.CreateBus("host=localhost").Advanced)
             {
                 var main = bus.ExchangeDeclare("MainExchange", ExchangeType.Direct);
-                var queue = bus.QueueDeclare("DirectQueue" + id);
+                var queue = bus.QueueDeclare("StatusQueue" + id);
                 bus.Bind(main, queue, "ActorStatus");
 
-                IMessage<StatusRequestMessage> request = MessagesFactory.GetMessage<StatusRequestMessage>("Master", "payload");
-                bus.Consume<StatusResponseMessage>(queue, (message, info) =>
-                {
-                    callback(message.Body.Payload);
-                });
+                var request = MessagesFactory.GetMessage<StatusRequestMessage>("Master", "payload");
                 bus.Publish(main, "StatusRequest" + id, true, request);
-                Console.WriteLine(id);
-                await Task.Delay(1999999);
             }
         }
 
-        public async void BroadcastStatusRequest(Callback callback)
+        public void BroadcastStatusRequest()
         {
             using (var bus = RabbitHutch.CreateBus("host=localhost").Advanced)
             {
                 var fanout = bus.ExchangeDeclare("BroadcastExchange", ExchangeType.Fanout);
-                IMessage<StatusRequestMessage> request = MessagesFactory.GetMessage<StatusRequestMessage>("Master", "payload");
-                bus.Publish(fanout, "broadcast", true, request);
-                await Task.Delay(1999999);
+                var request = MessagesFactory.GetMessage<StatusRequestMessage>("Master", "payload");
+                bus.Publish(fanout, "Broadcast", true, request);
+            }
+        }
+
+
+        public void SendObjectiveRequest(string id, string objective)
+        {
+            using (var bus = RabbitHutch.CreateBus("host=localhost").Advanced)
+            {
+                var exchange = bus.ExchangeDeclare("ObjectiveExchange", ExchangeType.Direct);
+                var request = MessagesFactory.GetMessage<ObjectiveRequestMessage>("Master", objective);
+                bus.Publish(exchange, "ObjectiveRequest" + id, true, request);
+            }
+        }
+
+        public void BroadcastObjectiveRequest(string objective)
+        {
+            using (var bus = RabbitHutch.CreateBus("host=localhost").Advanced)
+            {
+                var fanout = bus.ExchangeDeclare("BroadcastExchange", ExchangeType.Fanout);
+                var request = MessagesFactory.GetMessage<ObjectiveRequestMessage>("Master", objective);
+                bus.Publish(fanout, "Broadcast", true, request);
+                Console.WriteLine("Broadcast objective");
             }
         }
     }

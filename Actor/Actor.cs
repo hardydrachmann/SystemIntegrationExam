@@ -17,35 +17,55 @@ namespace Actor
 
             using (var bus = RabbitHutch.CreateBus("host=localhost").Advanced)
             {
-                // Declare an exchange:
+                // Declare queues and exchanges:
+                // Main (direct).
                 var mainExchange = bus.ExchangeDeclare("MainExchange", ExchangeType.Direct);
-				var mainQueue = bus.QueueDeclare("DirectQueue" + id);
-				bus.Bind(mainExchange, mainQueue, "StatusRequest" + id);
+                var mainQueue = bus.QueueDeclare("StatusQueue" + id);
+                bus.Bind(mainExchange, mainQueue, "StatusRequest" + id);
 
+                // Objective (direct).
+                var objectiveExchange = bus.ExchangeDeclare("ObjectiveExchange", ExchangeType.Direct);
+                var objectiveQueue = bus.QueueDeclare("ObjectiveQueue" + id);
+                bus.Bind(objectiveExchange, objectiveQueue, "ObjectiveRequest" + id);
+
+                // Broadcast (fanout).
                 var broadcastExchange = bus.ExchangeDeclare("BroadcastExchange", ExchangeType.Fanout);
-                var broadcastQueue = bus.QueueDeclare("FanoutQueue" + id);
-                bus.Bind(broadcastExchange, broadcastQueue, "broadcast");
+                var broadcastQueue = bus.QueueDeclare("BroadcastQueue" + id);
+                bus.Bind(broadcastExchange, broadcastQueue, "Broadcast");
 
-                // Create a message with Fanout (broadcasting):
-                IMessage<ActorDeclarationMessage> message = MessagesFactory.GetMessage<ActorDeclarationMessage>(id, "");
-
-                // Publish the message with the same routing key (the routing key, as mentioned above, is not used with Fanout exchange):
+                var message = MessagesFactory.GetMessage<ActorDeclarationMessage>(id, "");
                 bus.Publish(mainExchange, "ActorDeclaration", true, message);
 
-                bus.Consume<StatusRequestMessage>(mainQueue, (statusRequest, info) =>
+                // Consume messages using message handlers.
+                // Status request:
+                Action<IMessage<StatusRequestMessage>, MessageReceivedInfo> handleStatusRequest = (request, info) =>
                 {
-                    Console.WriteLine(statusRequest.Body.Payload + " directly from " + statusRequest.Body.Sender);
-                    IMessage<StatusResponseMessage> response = MessagesFactory.GetMessage<StatusResponseMessage>(id, "Actor status");
+                    var req = request.Body;
+                    Console.WriteLine("Received status request from " + req.Sender);
+                    string status = arbitraryStatus();
+                    Console.WriteLine("Declaring status: " + status);
+                    IMessage<StatusResponseMessage> response = MessagesFactory.GetMessage<StatusResponseMessage>(id, status);
                     bus.Publish(mainExchange, "ActorStatus", true, response);
-                    Console.WriteLine(id);
-                });
+                };
+                bus.Consume<StatusRequestMessage>(mainQueue, handleStatusRequest);
+                bus.Consume<StatusRequestMessage>(broadcastQueue, handleStatusRequest);
 
-                bus.Consume<StatusRequestMessage>(broadcastQueue, (statusRequest, info) =>
+                // Objective request:
+                Action<IMessage<ObjectiveRequestMessage>, MessageReceivedInfo> handleObjectiveRequest = (request, info) =>
                 {
-                    Console.WriteLine(statusRequest.Body.Payload + " broadcast from " + statusRequest.Body.Sender);
-                });
+                    var req = request.Body;
+                    Console.WriteLine("Received objective from " + req.Sender + ": " + req.Payload);
+                };
+                bus.Consume<ObjectiveRequestMessage>(objectiveQueue, handleObjectiveRequest);
+                bus.Consume<ObjectiveRequestMessage>(broadcastQueue, handleObjectiveRequest);
+
                 await Task.Delay(1999999);
             }
+        }
+
+        private string arbitraryStatus()
+        {
+            return new Random().Next(0, 2) > 0 ? "active" : "inactive";
         }
     }
 }

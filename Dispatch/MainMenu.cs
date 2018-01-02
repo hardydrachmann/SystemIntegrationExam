@@ -12,7 +12,10 @@ namespace Dispatch
 
         public MainMenu()
         {
-            new Task(() => dispatch.Listen(HandleActorID)).Start();
+            new Task(() => dispatch.Listen(HandleActorID, (payload) =>
+            {
+                Console.WriteLine(payload);
+            })).Start();
         }
 
         public void HandleActorID(string id)
@@ -71,10 +74,12 @@ namespace Dispatch
 
         private void getAllCarsStatus()
         {
-            dispatch.BroadcastStatusRequest((message) =>
-            {
-                Console.WriteLine("Actors responded with: " + message);
-            });
+            dispatch.BroadcastStatusRequest(
+            //    (message) =>
+            //{
+            //    Console.WriteLine("Actors responded with: " + message);
+            //}
+            );
         }
 
         private void getCarStatus()
@@ -83,16 +88,18 @@ namespace Dispatch
             getActors();
             Console.Write("\nEnter ID for the actor to get status from\n> ");
             string id = Console.ReadLine();
-            dispatch.SendStatusRequest(id, (message) =>
-            {
-                Console.Clear();
-                Console.ForegroundColor = ConsoleColor.Blue;
-                Console.Write("\nActor responded with: ");
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write(message);
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write("\n\nPress enter to return to the main menu...");
-            });
+            dispatch.SendStatusRequest(id
+            //    , (message) =>
+            //{
+            //    Console.Clear();
+            //    Console.ForegroundColor = ConsoleColor.Blue;
+            //    Console.Write("\nActor responded with: ");
+            //    Console.ForegroundColor = ConsoleColor.Yellow;
+            //    Console.Write(message);
+            //    Console.ForegroundColor = ConsoleColor.Green;
+            //    Console.Write("\n\nPress enter to return to the main menu...");
+            //}
+                                      );
             Console.ReadLine();
         }
 
@@ -101,6 +108,7 @@ namespace Dispatch
             Console.Clear();
             Console.Write("\nEnter a command to send to all actors\n> ");
             string broadcastInput = Console.ReadLine();
+            dispatch.BroadcastObjectiveRequest(broadcastInput);
         }
 
         private void directCommand()
@@ -111,6 +119,7 @@ namespace Dispatch
             string id = Console.ReadLine();
             Console.Write("\nEnter a command to send to actor " + id + "\n> ");
             string directInput = Console.ReadLine();
+            dispatch.SendObjectiveRequest(id, directInput);
         }
 
         private void exit()
