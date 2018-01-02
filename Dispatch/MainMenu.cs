@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Dispatch
@@ -74,12 +73,7 @@ namespace Dispatch
 
         private void getAllCarsStatus()
         {
-            dispatch.BroadcastStatusRequest(
-            //    (message) =>
-            //{
-            //    Console.WriteLine("Actors responded with: " + message);
-            //}
-            );
+            dispatch.BroadcastStatusRequest();
         }
 
         private void getCarStatus()
@@ -88,18 +82,8 @@ namespace Dispatch
             getActors();
             Console.Write("\nEnter ID for the actor to get status from\n> ");
             string id = Console.ReadLine();
-            dispatch.SendStatusRequest(id
-            //    , (message) =>
-            //{
-            //    Console.Clear();
-            //    Console.ForegroundColor = ConsoleColor.Blue;
-            //    Console.Write("\nActor responded with: ");
-            //    Console.ForegroundColor = ConsoleColor.Yellow;
-            //    Console.Write(message);
-            //    Console.ForegroundColor = ConsoleColor.Green;
-            //    Console.Write("\n\nPress enter to return to the main menu...");
-            //}
-                                      );
+            dispatch.SendStatusRequest(id);
+            Console.Write("\n\nPress enter to return to the main menu...");
             Console.ReadLine();
         }
 
