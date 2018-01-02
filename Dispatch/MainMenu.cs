@@ -19,7 +19,8 @@ namespace Dispatch
             actors.Add(id);
         }
 
-        public void HandleActorStatus(string status) {
+        public void HandleActorStatus(string status)
+        {
             Console.WriteLine(status);
         }
 
