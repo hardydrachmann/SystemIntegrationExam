@@ -86,7 +86,6 @@ namespace Dispatch
             string id = Console.ReadLine();
             dispatch.SendStatusRequest(id);
             Console.Write("\n\nPress enter to return to the main menu...");
-            Console.ReadLine();
         }
 
         private void broadcastCommand()

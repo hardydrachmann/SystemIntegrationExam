@@ -14,17 +14,17 @@ namespace Dispatch
         {
             using (var bus = RabbitHutch.CreateBus("host=localhost").Advanced)
             {
-                var main = bus.ExchangeDeclare("MainExchange", ExchangeType.Direct);
-                var queue = bus.QueueDeclare("MainQueue");
-                bus.Bind(main, queue, "ActorDeclaration");
+                var exchange = bus.ExchangeDeclare("MainExchange", ExchangeType.Direct);
+                var mainQueue = bus.QueueDeclare("MainQueue");
+                bus.Bind(exchange, mainQueue, "ActorDeclaration");
 
-                bus.Consume<ActorDeclarationMessage>(queue, (message, info) =>
+                bus.Consume<ActorDeclarationMessage>(mainQueue, (message, info) =>
                 {
                     // Whenever an actor declares it's existence, handle with sender id.
                     onActorDeclare(message.Body.Sender);
                 });
 
-                bus.Consume<StatusResponseMessage>(queue, (message, info) =>
+                bus.Consume<StatusResponseMessage>(mainQueue, (message, info) =>
                 {
                     // Whenever an actor sends a status response, handle response.
                     onStatusResponse(message.Body.Payload);
@@ -39,9 +39,6 @@ namespace Dispatch
             using (var bus = RabbitHutch.CreateBus("host=localhost").Advanced)
             {
                 var main = bus.ExchangeDeclare("MainExchange", ExchangeType.Direct);
-                var queue = bus.QueueDeclare("StatusQueue" + id);
-                bus.Bind(main, queue, "ActorStatus");
-
                 var request = MessagesFactory.GetMessage<StatusRequestMessage>("Master", "payload");
                 bus.Publish(main, "StatusRequest" + id, true, request);
             }
