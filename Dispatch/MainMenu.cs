@@ -12,15 +12,16 @@ namespace Dispatch
 
         public MainMenu()
         {
-            new Task(() => dispatch.Listen(HandleActorID, (payload) =>
-            {
-                Console.WriteLine(payload);
-            })).Start();
+            new Task(() => dispatch.Listen(HandleActorID, HandleActorStatus)).Start();
         }
 
         public void HandleActorID(string id)
         {
             actors.Add(id);
+        }
+
+        public void HandleActorStatus(string status) {
+            Console.WriteLine(status);
         }
 
         public void Start()
